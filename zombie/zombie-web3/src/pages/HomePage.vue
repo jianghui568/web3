@@ -21,70 +21,75 @@
     </div>
   </div>
 </template>
+<script lang="ts">
+import { defineComponent, ref, watch, onUnmounted } from 'vue';
+import { ZombieSkin } from '../assets/zombie/ZombieSkin.ts';
 
-<script setup lang="ts">
-import {onUnmounted, ref, watch} from "vue";
-import {ZombieSkin} from "../assets/zombie/ZombieSkin.ts";
+export default defineComponent({
+  name: 'HomePage',
+  setup() {
+    // DNA values for different parts of the zombie
+    const headDna = ref(1);
+    const eyeDna = ref(1);
+    const shirtDna = ref(1);
 
-const headDna = ref(1);
-const eyeDna = ref(1);
-const shirtDna = ref(1);
+    // Get zombie skin configuration (assuming ZombieSkin is properly set up)
+    const zombieSkin = ZombieSkin.getConfig();
 
-const zombieSkin = ZombieSkin.getConfig()
-// 监听 count 变量的变化
-watch(headDna, (newVal) => {
-  ZombieSkin.changeHead(newVal);
+    // Watch changes in the DNA values and update zombie skin accordingly
+    watch(headDna, (newVal) => {
+      ZombieSkin.changeHead(newVal);
+    });
+    watch(eyeDna, (newVal) => {
+      ZombieSkin.changeEye(newVal);
+    });
+    watch(shirtDna, (newVal) => {
+      ZombieSkin.changeShirt(newVal);
+    });
+
+    // Timer setup to randomize the zombie's appearance
+    let time = 0;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const startTimer = () => {
+      timeoutId = setInterval(() => {
+        time += 1;
+        randomizeZombie();
+      }, 1000);
+    };
+
+    const stopTimer = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+    };
+
+    // Clean up the timer when component is unmounted
+    onUnmounted(() => {
+      stopTimer();
+    });
+
+    startTimer();
+
+    // Function to randomize zombie parts
+    const randomizeZombie = () => {
+      headDna.value += 1;
+      headDna.value = headDna.value > 6 ? 1 : headDna.value;
+
+      eyeDna.value += 1;
+      eyeDna.value = eyeDna.value > 6 ? 1 : eyeDna.value;
+
+      shirtDna.value += 1;
+      shirtDna.value = shirtDna.value > 6 ? 1 : shirtDna.value;
+    };
+
+    return {
+      zombieSkin,
+      // randomizeZombie,
+    };
+  },
 });
-watch(eyeDna, (newVal) => {
-  ZombieSkin.changeEye(newVal);
-});
-watch(shirtDna, (newVal) => {
-  ZombieSkin.changeShirt(newVal);
-});
-
-
-// 定义响应式变量
-let time = 0;
-
-// 定义定时器ID
-let timeoutId: ReturnType<typeof setTimeout> | null = null;
-// 启动定时器
-const startTimer = () => {
-  // 延迟 3 秒后更新 time
-  timeoutId = setInterval(() => {
-    time += 1;
-    randomizeZombie();
-  }, 1000);
-};
-
-// 停止定时器
-const stopTimer = () => {
-  if (timeoutId) {
-    clearTimeout(timeoutId);
-    timeoutId = null;
-  }
-};
-
-// 清理定时器（组件卸载时）
-onUnmounted(() => {
-  stopTimer()
-});
-
-startTimer();
-
-const randomizeZombie = () => {
-
-  console.log('xxxxxxxxxxxxxx', time);
-  headDna.value += 1;
-  headDna.value = headDna.value > 6 ? 1 : headDna.value;
-
-  eyeDna.value += 1;
-  eyeDna.value = eyeDna.value > 6 ? 1 : eyeDna.value;
-
-  shirtDna.value += 1;
-  shirtDna.value = shirtDna.value > 6 ? 1 : shirtDna.value;
-};
-
 </script>
 <style scoped>
 
